@@ -89,3 +89,34 @@ void init_LCD(void)
   LCD_command(0x0C);      
   msdelay(15); 
   LCD_command(0x80);      
+ msdelay(15); 
+      }   
+void LCD_command(unsigned char cmd) 
+ { 
+   LCD_DATA = cmd;      
+   rs = 0;    
+   rw = 0;    
+   en = 1;     
+   msdelay(15); 
+   en = 0; 
+      }   
+void LCD_data(unsigned char data)
+ { 
+   LCD_DATA = data;    
+   rs = 1;    
+   rw = 0;      
+   en = 1;       
+   msdelay(15);  
+   en = 0; 
+    } 
+
+void LCD_write_string(static char *str)   
+ { 
+   int i = 0;  
+   while (str[i] != 0)  
+    { 
+      LCD_data(str[i]);      
+      msdelay(15); 
+      i++; 
+        } 
+         }                                                  
