@@ -1,0 +1,91 @@
+ #define en  PORTEbits.RE2 
+ #define rw  PORTEbits.RE1 
+ #define rs  PORTEbits.RE0    
+  
+ void ADC_Init(void);    
+ unsigned int  Get_ADC_Result(void); 
+ void Start_Conversion(void);
+ void msdelay (unsigned int time);  
+ void init_LCD(void);   
+ void LCD_command(unsigned char cmd);  
+ void LCD_data(unsigned char data);
+ void LCD_write_string(static char *str);
+
+ void main() 
+  { 
+   char msg1[] = "AIT Pune-15";   
+   char msg2[] = "ADC O/P:";   
+   unsigned char i, Thousands,Hundreds,Tens,Ones,dot; 
+   unsigned int adc_val; 
+  dot= 46; 
+     ADCON1 = 0x0F;        
+     TRISD = 0x00;        
+     TRISE = 0x00;        
+ 
+   ADC_Init();  
+   init_LCD();    
+   LCD_write_string(msg1);  
+   LCD_command(0xC0);     
+   LCD_write_string(msg2); 
+ 
+    while(1)   
+   { 
+      Start_Conversion();  
+      adc_val= Get_ADC_Result();  
+      adc_val=adc_val*6.84; 
+      LCD_command (0xC8);     
+      
+      i = adc_val/1000 ;   
+      Thousands = i + 0x30;    
+      LCD_data (Thousands);  
+       
+      i = (adc_val%1000)/100; 
+      Hundreds = i + 0x30;    
+      LCD_data (Hundreds);  
+      LCD_data(dot); 
+      i = ((adc_val%1000)%100)/10; 
+      Tens = i + 0x30;    
+     LCD_data (Tens);  
+   
+      i = adc_val%10 ;   
+      Ones = i + 30;       
+      LCD_data (i + 0x30);     
+      msdelay(300);    
+        }  
+         } 
+
+void ADC_Init()  
+  { 
+    ADCON0=0b00000100;  
+    ADCON1=0b00001110; 
+    ADCON2=0b10001110;      
+    ADCON0bits.ADON=1;  
+             }   
+void Start_Conversion()  
+ { 
+   ADCON0bits.GO=1; 
+  }   
+
+ unsigned int Get_ADC_Result()  
+  { 
+   unsigned int ADC_Result=0; 
+   while(ADCON0bits.GO); 
+    ADC_Result=ADRESL;   
+    ADC_Result|=((unsigned int)ADRESH) << 8;   
+    return ADC_Result; 
+       }    
+void msdelay (unsigned int time) 
+{  
+  unsigned int i, j;  
+  for (i = 0; i < time; i++) 
+  for (j = 0; j < 710; j++);//Calibrated for a 1 ms delay in MPLAB  
+    }    
+void init_LCD(void)  
+ { 
+  LCD_command(0x38);         
+  msdelay(15); 
+  LCD_command(0x01);     
+  msdelay(15);   
+  LCD_command(0x0C);      
+  msdelay(15); 
+  LCD_command(0x80);      
